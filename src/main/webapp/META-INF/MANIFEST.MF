@@ -1,0 +1,11 @@
+Manifest-Version: 1.0
+Implementation-Title: JeeSite Boot
+Implementation-Version: 4.0.6-SNAPSHOT
+Built-By: admin
+Implementation-Vendor-Id: com.jeesite
+Created-By: Apache Maven 3.3.9
+Build-Jdk: 1.8.0_181
+Implementation-URL: http://jeesite.com
+Implementation-Vendor: JeeSite
+Main-Class: com.jeesite.modules.config.Application
+
