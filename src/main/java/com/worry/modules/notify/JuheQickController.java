@@ -2,8 +2,10 @@ package com.worry.modules.notify;
 
 import com.google.gson.Gson;
 import com.worry.common.util.*;
+import io.swagger.annotations.*;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import java.util.HashMap;
@@ -11,37 +13,45 @@ import java.util.Map;
 
 @Controller
 @RequestMapping("/notify")
+@Api(value = "/notify", description = "聚合汇通Controller")
 public class JuheQickController {
 
 
-    @RequestMapping("/register")
+    @RequestMapping(value = "/rateUpdate",method = RequestMethod.POST,produces = {"application/json;charset=utf-8"})
+    @ApiOperation(value = "代还费率修改")
     @ResponseBody
-    public String register() throws Exception {
-        Map<String,String> map=new HashMap<>();
-        map.put("verCode","1001");//固定1001
-        map.put("chMerCode","207974763298");//子商户号
-        map.put("busCode","3001");//业务编码
-        map.put("drawFee","0.50");//手续费 已元为单位，精确到分
-        map.put("tradeRate","0.0042");//费率 0.5% 传0.005
+    @ApiImplicitParams(
+            {
+                    @ApiImplicitParam(name = "merchantNo",value = "商户号",paramType = "query",required = true,dataType = "String"),
+                    @ApiImplicitParam(name = "config",value = "DHE、DHF",paramType = "query",required = true,dataType = "String"),
+                    @ApiImplicitParam(name = "settleBankNo",value = "结算卡号",paramType = "query",required = true,dataType = "String"),
+                    @ApiImplicitParam(name = "cost",value = "手续费以分为单位（如1元传100）",paramType = "query",required = true,dataType = "String"),
+                    @ApiImplicitParam(name = "type",value = "类型 0 修改结算卡 1修改费率",paramType = "query",required = true,dataType = "String"),
+                    @ApiImplicitParam(name = "rate",value = "费率（如0.35%，传0.35即可）",paramType = "query",required = true,dataType = "String")
+            }
+    )
 
-        map.put("orgCode", QuickConfig.TEST_MECH_NO);//机构编号
-        String encryptData=new Gson().toJson(map);
-        System.out.println("加密数据前："+encryptData);
-        byte[]bytes= AESUtil.encryptAES(encryptData.getBytes("UTF-8"),QuickConfig.TEST_AES_KEY.getBytes(),true,"UTF-8");
-        System.out.println("AES加密："+ new String(bytes));
+    public String rateUpdate(String  config,String merchantNo,String settleBankNo,String rate,String cost,String type) throws Exception {
+        Map<String,String> map=new HashMap<>();
+        map.put("agentNo", Config.agentNo);//渠道号
+        map.put("config", config);//通道参数 这里默认DHE
+
+        map.put("merchantNo",merchantNo);//商户外部唯一标识，什么类型都行，只要保证唯一
+        map.put("settleBankNo",settleBankNo);//结算卡号
+        //map.put("settleType","00");//卡折类型
+        map.put("rate",rate);//费率
+        map.put("cost",cost);//提现手续费
+        map.put("type",type);//修改类型
 
         String a= SignUtils.payParamsToString(map);
-        a=a+"&md5key="+QuickConfig.TEST_MD5_KEY;
-        System.out.println("拼接签名："+a);
+        System.out.println("签名前："+a);
+        a=a+Config.key;
+        String sign= MD5.md5Str(a);
+        map.put("sign",sign);
+        System.out.println("签名："+sign);
 
-        map.put("signData", MD5.md5Str(a).toUpperCase());//数据签名
-        map.put("encryptData",new String(bytes));//加密报文
-        System.out.println("签名："+map.get("signData"));
-        String response= HttpClient.post(QuickConfig.MER_BUSINESS,map);
-        String respEntryData=new Gson().fromJson(response, Response.class).getEncryptData();
-        System.out.println("返回数据："+respEntryData);
-        byte[]decrypt=AESUtil.decryptAES(respEntryData.getBytes(), QuickConfig.TEST_AES_KEY.getBytes(), true, "UTF-8");
-        System.out.println("解密后数据："+new String(decrypt,"utf-8"));
-        return new String(decrypt,"utf-8");
+        String response= HttpClient.post(Config.url+"/dh/update",map);
+        System.out.println("返回数据："+response);
+        return response;
     }
 }
