@@ -54,4 +54,39 @@ public class JuheQickController {
         System.out.println("返回数据："+response);
         return response;
     }
+
+    @RequestMapping(value = "/elements",method = RequestMethod.POST,produces = {"application/json;charset=utf-8"})
+    @ApiOperation(value = "四要素验证")
+    @ResponseBody
+    @ApiImplicitParams(
+            {
+                    @ApiImplicitParam(name = "name",value = "姓名",paramType = "query",required = true,dataType = "String"),
+                    @ApiImplicitParam(name = "idNo",value = "身份证号",paramType = "query",required = true,dataType = "String"),
+                    @ApiImplicitParam(name = "bizPhone",value = "预留手机号",paramType = "query",required = true,dataType = "String"),
+                    @ApiImplicitParam(name = "cardNo",value = "银行卡号",paramType = "query",required = true,dataType = "String"),
+            }
+    )
+    public String elements(String name,String idNo,String bizPhone,String cardNo){
+        String agentNo = "1001";
+        String agentKey = "ebfa49009452eb8625d592ff8eefaf9e";
+        Map<String,String> map=new HashMap<>();
+        map.put("agentNo",agentNo);
+        map.put("name",name);
+        map.put("idNo",idNo);
+        map.put("bizPhone",bizPhone);
+        map.put("cardNo",cardNo);
+        String a = SignUtils.payParamsToString(map);
+        a = a+agentKey;
+        System.out.println("sign加密前的字符串="+a);
+        System.out.println("密钥="+agentKey);
+        System.out.println("xxxx"+a);
+        String sign = MD5.md5Str(a);
+        System.out.println("MD5加密后的结果="+sign);
+        map.put("sign", sign);
+
+        String url = "http://pay.weitongpay.com/payapi/bankCardVerify";
+        String response = HttpClient.post(url, map);
+        System.out.println("response="+response);
+        return response;
+    }
 }

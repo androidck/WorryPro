@@ -261,7 +261,7 @@ public class JiafuController {
 
 
     @ResponseBody
-    @ApiOperation(value = "绑定信用卡发送短信")
+    @ApiOperation(value = "绑定信用卡")
     @RequestMapping(value = "/bindCardMsg",method = {RequestMethod.POST,RequestMethod.GET},produces = {"application/json;charset=utf-8"})
     @ApiImplicitParams(
             {
@@ -271,11 +271,13 @@ public class JiafuController {
                     @ApiImplicitParam(name = "accNo",value = "卡号",paramType = "query",required = true,dataType = "String"),
                     @ApiImplicitParam(name = "cvv2",value = "cvv2",paramType = "query",required = true,dataType = "String"),
                     @ApiImplicitParam(name = "validityDate",value = "有效期",paramType = "query",required = true,dataType = "String"),
-                    @ApiImplicitParam(name = "mobile",value = "预留手机号",paramType = "query",required = true,dataType = "String"),
+                    @ApiImplicitParam(name = "type",value = "1、发送短信，2、确认",paramType = "query",required = true,dataType = "String"),
+                    @ApiImplicitParam(name = "tradeNo",value = "流水号",paramType = "query",required = false,dataType = "String"),
+                    @ApiImplicitParam(name = "smscode",value = "验证码",paramType = "query",required = false,dataType = "String")
 
             }
     )
-    public String bindCardMsg(String chMerCode,String accName ,String idCard,String accNo,String cvv2,String validityDate,String mobile) throws Exception{
+    public String bindCardMsg(String chMerCode,String accName ,String idCard,String accNo,String cvv2,String validityDate,String mobile,String type,String tradeNo,String smscode) throws Exception{
         Map<String,String> map=new HashMap<>();
         map.put("verCode","1001");//固定值：1001
         map.put("chMerCode",chMerCode);//商户唯一标识
@@ -285,6 +287,10 @@ public class JiafuController {
         map.put("cvv2",cvv2);//cvv2
         map.put("validityDate",validityDate);//有效期
         map.put("mobile",mobile);//预留手机号
+        if (type.equals("2")){
+            map.put("tradeNo",tradeNo);//短信流水号
+            map.put("smscode",smscode);//短信验证码
+        }
 
 
         map.put("orgCode", QuickConfig.TEST_MECH_NO);//机构编号
@@ -300,7 +306,13 @@ public class JiafuController {
         map.put("signData", MD5.md5Str(a).toUpperCase());//数据签名
         map.put("encryptData",new String(bytes));//加密报文
         System.out.println("签名："+map.get("signData"));
-        String response= HttpClient.post(QuickConfig.MER_BIND_CARD_MSG,map);
+        String response;
+        if (type.equals("2")){
+            response= HttpClient.post(QuickConfig.MER_BIND_CARD_CONFIRM,map);
+        }else {
+            response= HttpClient.post(QuickConfig.MER_BIND_CARD_MSG,map);
+        }
+
         String respEntryData=new Gson().fromJson(response, Response.class).getEncryptData();
         System.out.println("返回数据："+respEntryData);
         byte[]decrypt=AESUtil.decryptAES(respEntryData.getBytes(), QuickConfig.TEST_AES_KEY.getBytes(), true, "UTF-8");
