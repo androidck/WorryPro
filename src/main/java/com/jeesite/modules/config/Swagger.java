@@ -21,6 +21,7 @@ public class Swagger {
     @Bean
     public Docket createRestApi(){
         return new Docket(DocumentationType.SWAGGER_2)
+                .host("www.worryfree-pay.com")
                 .apiInfo(apiInfo())
                 .select()
                 .apis(RequestHandlerSelectors.basePackage("com.worry.modules.notify"))

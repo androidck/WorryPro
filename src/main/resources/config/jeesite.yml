@@ -19,8 +19,8 @@ demoMode: false
 #============================#
 
 # 数据库连接
-jdbc: 
-  
+jdbc:
+
   # Mysql 数据库配置
   type: mysql
   driver: com.mysql.jdbc.Driver

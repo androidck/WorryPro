@@ -271,6 +271,7 @@ public class JiafuController {
                     @ApiImplicitParam(name = "accNo",value = "卡号",paramType = "query",required = true,dataType = "String"),
                     @ApiImplicitParam(name = "cvv2",value = "cvv2",paramType = "query",required = true,dataType = "String"),
                     @ApiImplicitParam(name = "validityDate",value = "有效期",paramType = "query",required = true,dataType = "String"),
+                    @ApiImplicitParam(name = "mobile",value = "预留手机号",paramType = "query",required = true,dataType = "String"),
                     @ApiImplicitParam(name = "type",value = "1、发送短信，2、确认",paramType = "query",required = true,dataType = "String"),
                     @ApiImplicitParam(name = "tradeNo",value = "流水号",paramType = "query",required = false,dataType = "String"),
                     @ApiImplicitParam(name = "smscode",value = "验证码",paramType = "query",required = false,dataType = "String")

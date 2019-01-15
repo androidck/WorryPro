@@ -4,6 +4,8 @@
 package com.jeesite.modules.test.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -23,7 +25,8 @@ import com.jeesite.modules.test.entity.TestDataChild;
 @Service
 @Transactional(readOnly=true)
 public class TestDataService extends CrudService<TestDataDao, TestData> {
-	
+
+
 	@Autowired
 	private TestDataChildDao testDataChildDao;
 	
